@@ -6,12 +6,14 @@
 #include "../parser/parser.hpp"
 #include "../misc/globals.hpp"
 #include "../misc/map_get.hpp"
-
 using namespace std;
 
 Parser prs;
 map<string,Controller::handler> handlers;
-
+void manualControl(int a,int b,int c){
+	cout<<"CONVERTED VALUES \n";
+	cout<<a<<" "<<b<<" "<<c<<endl;
+}
 void Controller::handleServerConnection(uint16_t fd)
 {
 	cout << "Controller: got connect from " << fd << endl;
@@ -44,12 +46,39 @@ void Controller::handleServerInput(uint16_t fd, char *buffer)
 	}
 
 	//look it up in the handlers map
-	Controller::handler h = NULL;
-	if(map_get<string,Controller::handler>(&handlers, key, &h))
-	{
-		printf("Controller: handler address = '%x'\n",h);
-		//call the callback function
-		h(&prs.values);
+	// Controller::handler h = NULL;
+	// if(map_get<string,Controller::handler>(&handlers, key, &h))
+	// {
+	// 	printf("Controller: handler address = '%x'\n",h);
+	// 	//call the callback function
+	// 	h(&prs.values);
+	// }
+	if(key=="A"){
+		cout<<"Auto mode"<<endl;
+		cout<<prs.values[1]<<endl;
+		cout<<prs.values[2]<<endl;
+		cout<<prs.values[3]<<endl;
+		cout<<prs.values[4]<<endl;
+		cout<<prs.values[5]<<endl;
+		cout<<prs.values[6]<<endl;
+		// automaticMode(stoi(prs.values[1]),stoi(prs.values[2]),stoi(prs.values[3]),stoi(prs.values[4]),stoi(prs.values[5]));
+
+		//respond with complete message
+	}
+	else if(key=="D"){
+		char response[3]={1,1,1};
+		cout<<"Diagnostics"<<endl;
+		//array[3 values]= rundiagnostics()
+		send(fd,response,strlen(response),0);
+		//respond with 3 values
+	}
+	else if(key=="J"){
+		cout<<"Joy input"<<endl;
+		cout<<prs.values[1]<<endl;
+		cout<<prs.values[2]<<endl;
+		cout<<prs.values[3]<<endl;
+		manualControl(stoi(prs.values[1]),stoi(prs.values[2]),stoi(prs.values[3]));
+
 	}
 	else
 	{
