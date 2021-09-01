@@ -1,6 +1,6 @@
 CC = g++
 
-CFLAGS = -g
+CFLAGS = -g -l wiringPi
 CFLAGS_OBJ = $(CFLAGS) -c
 CFLAGS_BUILD = $(CFLAGS) -o main
 

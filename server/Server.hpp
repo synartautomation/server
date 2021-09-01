@@ -27,7 +27,7 @@
 #include <iostream>
 
 #define INPUT_BUFFER_SIZE 100 //test: 100 bytes of buffer
-#define DEFAULT_PORT 9034
+#define DEFAULT_PORT 8080
 
 class Server
 {
