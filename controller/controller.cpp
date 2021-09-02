@@ -19,7 +19,7 @@ string feedbackString;
 uint8_t encoders[]= {0x0c,0x0a,0x0b};
 I2C_drive motors(4,encoders,0x1d);
 int pwm[4]={0,0,0,0};
-
+float offset[4]= {0,0,0,0};
 string padZeros(float input, int width)
 {
     std::ostringstream out;
@@ -39,10 +39,10 @@ void manualControl(uint16_t fd,int a,int b,int c){
 	pwm[2]=c;
 	pwm[3]=0;
 	motors.drive(pwm,true);
-	// createFeedbackString(1,motors.value[0].val,round(motors.value[1].val*WHEELSIZE*100.0)/100.0,round(motors.value[2].val*WHEELSIZE*100.0)/100.0);                
-	// char *response;
-	// response=&feedbackString[0];
-	// send(fd,response,32,0);
+	createFeedbackString(1,motors.value[0].val-offset[0],round((motors.value[1].val-offset[1])*WHEELSIZE*100.0)/100.0,round((motors.value[2].val-offset[2])*WHEELSIZE*100.0)/100.0);                
+	char *response;
+	response=&feedbackString[0];
+	send(fd,response,32,0);
 }
 void Controller::handleServerConnection(uint16_t fd)
 {
@@ -91,7 +91,7 @@ void Controller::handleServerInput(uint16_t fd, char *buffer)
 		pwm[2]=stoi(prs.values[3]);
 		pwm[3]=stoi(prs.values[4]);
 		motors.drive(pwm,true);
-		createFeedbackString(1,motors.value[0].val,round(motors.value[1].val*WHEELSIZE*100.0)/100.0,round(motors.value[2].val*WHEELSIZE*100.0)/100.0);                
+		createFeedbackString(1,motors.value[0].val-offset[0],round((motors.value[1].val-offset[1])*WHEELSIZE*100.0)/100.0,round((motors.value[2].val-offset[2])*WHEELSIZE*100.0)/100.0);                
 		char *response;
 		response=&feedbackString[0];
 		cout<<"[RESPONSE] "<<response<<endl;
@@ -110,8 +110,7 @@ void Controller::handleServerInput(uint16_t fd, char *buffer)
 	}
 	else if(key=="F"){
 		motors.read_float();
-		//createFeedbackString(1,motors.value[0].val,69,69);
-		createFeedbackString(1,motors.value[0].val,round(motors.value[1].val*WHEELSIZE*100.0)/100.0,round(motors.value[2].val*WHEELSIZE*100.0)/100.0);                
+		createFeedbackString(1,motors.value[0].val-offset[0],round((motors.value[1].val-offset[1])*WHEELSIZE*100.0)/100.0,round((motors.value[2].val-offset[2])*WHEELSIZE*100.0)/100.0);                
 		char *response;
 		response=&feedbackString[0];
 		cout<<"[RESPONSE] "<<response<<endl;
@@ -123,11 +122,15 @@ void Controller::handleServerInput(uint16_t fd, char *buffer)
 		cout<<prs.values[1]<<endl;
 		cout<<prs.values[2]<<endl;
 		cout<<prs.values[3]<<endl;
-		 manualControl(fd,stoi(prs.values[1]),stoi(prs.values[2]),stoi(prs.values[3]));
+		manualControl(fd,stoi(prs.values[1]),stoi(prs.values[2]),stoi(prs.values[3]));
 	}
 	else if(key=="C"){
 		cout<<"Calibration"<<endl;
 		//Reset Encoders and write 0 into currentPosition.txt
+		motors.read_float();
+		offset[0]=motors.value[0].val;
+		offset[1]=motors.value[1].val;
+		offset[2]=motors.value[2].val;
 	}
 	else
 	{
