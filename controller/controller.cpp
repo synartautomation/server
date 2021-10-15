@@ -34,9 +34,9 @@ Parser prs;
 map<string,Controller::handler> handlers;
 void manualControl(uint16_t fd,int a,int b,int c){
 	motors.read_float();
-	pwm[0]=a;
-	pwm[1]=b;
-	pwm[2]=c;
+	pwm[0]=a/6;
+	pwm[1]=b/2;
+	pwm[2]=c/2;
 	pwm[3]=0;
 	motors.drive(pwm,true);
 	createFeedbackString(1,motors.value[0].val-offset[0],round((motors.value[1].val-offset[1])*WHEELSIZE*100.0)/100.0,round((motors.value[2].val-offset[2])*WHEELSIZE*100.0)/100.0);                
@@ -52,6 +52,13 @@ void Controller::handleServerConnection(uint16_t fd)
 void Controller::handleServerDisconnect(uint16_t fd)
 {
 	cout << "Controller: got disconnect from " << fd << endl;
+/*
+	pwm[0]=0;
+	pwm[1]=0;
+	pwm[2]=0;
+	pwm[3]=0;
+	motors.drive(pwm,true);
+*/
 }
 
 void Controller::handleServerInput(uint16_t fd, char *buffer)
@@ -132,6 +139,10 @@ void Controller::handleServerInput(uint16_t fd, char *buffer)
 		offset[1]=motors.value[1].val;
 		offset[2]=motors.value[2].val;
 	}
+	else if(key=="X"){
+		system("sudo poweroff");
+	}
+
 	else
 	{
 		cerr << "[ERROR] Controller: No such action (" << key << ")\n";
